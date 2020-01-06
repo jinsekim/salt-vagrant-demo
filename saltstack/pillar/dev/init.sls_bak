@@ -1,0 +1,14 @@
+permission:
+  user: root
+  group: root
+                    
+env:
+  roles:
+    dev:
+      - minion1
+      - dev
+      - demo
+    live:
+      - minion2
+      - live
+      - demo
