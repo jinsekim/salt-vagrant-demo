@@ -15,15 +15,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.cpus = 1
         vb.name = "master"
     end
-  config.vm.synced_folder "/Users/a201912010/Desktop/Git/DHK/salt", "/srv/salt"
-  config.vm.synced_folder "/Users/a201912010/Desktop/Git/DHK/public-pillar", "/srv/pillar"
-  config.vm.synced_folder "/Users/a201912010/Desktop/Git/DHK/devops_docker", "/srv/devops_docker"
 
     master_config.vm.box = "#{os}"
     master_config.vm.host_name = 'saltmaster.local'
     master_config.vm.network "private_network", ip: "#{net_ip}.10"
-    master_config.vm.synced_folder "saltstack/salt/", "/srv/salt"
-    master_config.vm.synced_folder "saltstack/pillar/", "/srv/pillar"
+#    master_config.vm.synced_folder "saltstack/salt/", "/srv/salt"
+#    master_config.vm.synced_folder "saltstack/pillar/", "/srv/pillar"    
+    master_config.vm.synced_folder "/Users/a201912010/Desktop/Git/DHK/salt", "/srv/salt"
+    master_config.vm.synced_folder "/Users/a201912010/Desktop/Git/DHK/public-pillar", "/srv/pillar"
+    master_config.vm.synced_folder "/Users/a201912010/Desktop/Git/DHK/devops_docker", "/srv/devops_docker"
 
     master_config.vm.provision :salt do |salt|
       salt.master_config = "saltstack/etc/master"
@@ -33,7 +33,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       salt.minion_pub = "saltstack/keys/master_minion.pub"
       salt.seed_master = {
                           "minion1" => "saltstack/keys/minion1.pub",
-                          "minion2" => "saltstack/keys/minion2.pub"
+                          "minion2" => "saltstack/keys/minion2.pub",
+                          "minion3" => "saltstack/keys/minion3.pub",
+                          "minion4" => "saltstack/keys/minion4.pub"                          
                          }
 
       salt.install_type = "stable"
@@ -72,4 +74,32 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       end
     end
   end
+
+  [
+    ["minion3",    "#{net_ip}.13",    "1024",    os ],
+    ["minion4",    "#{net_ip}.14",    "1024",    os ],
+  ].each do |vmname,ip,mem,os|
+    config.vm.define "#{vmname}" do |minion_config|
+      minion_config.vm.provider "virtualbox" do |vb|
+          vb.memory = "#{mem}"
+          vb.cpus = 1
+          vb.name = "#{vmname}"
+      end
+
+      minion_config.vm.box = "centos/6"
+      minion_config.vm.hostname = "#{vmname}"
+      minion_config.vm.network "private_network", ip: "#{ip}"
+
+      minion_config.vm.provision :salt do |salt|
+        salt.minion_config = "saltstack/etc/#{vmname}"
+        salt.minion_key = "saltstack/keys/#{vmname}.pem"
+        salt.minion_pub = "saltstack/keys/#{vmname}.pub"
+        salt.install_type = "stable"
+        salt.verbose = true
+        salt.colorize = true
+        salt.bootstrap_options = "-P -c /tmp"
+      end
+    end
+  end  
+  
 end
