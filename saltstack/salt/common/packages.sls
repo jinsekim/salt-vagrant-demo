@@ -4,3 +4,5 @@ common_packages:
       - htop
       - strace
       - vim
+      - mysql-client
+      - nginx

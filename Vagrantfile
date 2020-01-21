@@ -15,7 +15,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.cpus = 1
         vb.name = "master"
     end
-    
+  config.vm.synced_folder "/Users/a201912010/Desktop/Git/DHK/salt", "/srv/salt"
+  config.vm.synced_folder "/Users/a201912010/Desktop/Git/DHK/public-pillar", "/srv/pillar"
+  config.vm.synced_folder "/Users/a201912010/Desktop/Git/DHK/devops_docker", "/srv/devops_docker"
+
     master_config.vm.box = "#{os}"
     master_config.vm.host_name = 'saltmaster.local'
     master_config.vm.network "private_network", ip: "#{net_ip}.10"
